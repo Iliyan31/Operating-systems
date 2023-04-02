@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then 
+	echo "There must be two directories!\n" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then
+	echo "The first parameter must e a readable directory!\n" >&2
+	exit 2
+fi
+
+if [ ! -d "$2" ]; then 
+	echo "The second directory must exist!\n" >&2
+	exit 3
+fi
+
+if [ ! -f "$1/db" -o ! -d "$1/packages" ]; then 
+	echo "There must be .....\n" >&2
+	exit 4
+fi
+
+if [ ! -f "$2/version" -o ! -d "$2/tree" ]; then
+   echo "There must be .........\n" >&2	
+   exit 5
+fi
+
+version="$(cat "$(find "$2" -mindepth 1 -maxdepth 1 -type f)")"
+tar -czf tree.tar.xz "$2"/tree
+sha="$(sha256sum tree.tar.xz | awk '{print $1}')"
+mv tree.tar.xz "$sha".tar.xz
+name="$(basename "$2")"
+dbline="$(echo "$name-$version $sha")"
+n="$(egrep "$dbline" "$1"/db | wc -l)"
+if [ "$n" -eq 0 ]; then 
+	echo "$dbline" >> "$1"/db
+	sort "$1"/db
+	mv "$sha".tar.xz "$1"/packages
+else
+	mv "$sha".tar.xz "$1"/packages
+fi
+
+exit 0

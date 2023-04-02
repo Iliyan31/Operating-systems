@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "There must be one parameter!" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "The first parameter must be a file!" >&2
+	exit 2
+fi
+
+temp="$(mktemp)"
+counter=0
+cat "$1" | cut -d '-' -f 2- | cut -c 2- | while read line; do
+	counter="$((counter + 1))"
+	echo "$counter. $line" >> "$temp"
+done
+
+cat "$temp" | sort -t '.' -k 2 
+
+rm "$temp"
+exit 0
+

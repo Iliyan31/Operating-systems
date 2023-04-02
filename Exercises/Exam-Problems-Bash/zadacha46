@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then 
+	echo "VBsN!\n" >&2
+	exit 1
+fi
+
+if ! (echo "$1" | egrep -q "^[[:digit:]]+(\.[[:digit:]]+)?$"); then 
+	echo "skahjhjfgk!\n" >&2 
+	exit 2
+fi
+
+if [ -z "$2" -o -z "$3" ]; then 
+	echo "kdjFkb!\n" >&2
+	exit 3
+fi
+
+n="$(egrep "$2" prefix.csv | wc -l)"
+m="$(egrep "$3" base.csv | wc -l)"
+
+if [ "$n" -eq 0 -o "$m" -eq 0 ]; then 
+	echo "ECBjk!\n" 
+	exit 0
+fi
+
+num="$(egrep "$2" ./prefix.csv | awk -F ',' '{print $NF}')"
+number="$(echo "$1"*"$num" | bc -l)"
+name="$(egrep ",$3," base.csv | awk -F ',' '{print $1}')"
+var="$(egrep ",$3," base.csv | awk -F ',' '{print $NF}')"
+echo "$number $3 ($var, $name)"

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+	echo "There must be two parameters!" >&2
+	exit 1
+fi
+
+if [ -f "$1" ]; then
+	echo "The file mustn't exist!" >&2
+	exit 2
+fi
+
+if [ ! -d "$2" ]; then 
+	echo "The second parameter must be a directory!" >&2
+	exit 3
+fi
+
+touch ./"$1"
+
+echo "hostname,phy,vlans,hosts,failover,VPN-3DES-AES,peers,VLAN Trunk Ports,license,SN,key" >> "$1"
+
+find "$2" -type f -name "*.log" | while read line; do
+	nospace="$(sed "s/[[:space:]]//g" "$line")"
+	hostName="$(basename "$line" | sed "s/\.log$//g")"
+	phy="$(echo "$nospace" | egrep "^MaximumPhysicalInterfaces"| cut -d ":" -f 2)"
+	vlans="$(echo "$nospace" | egrep "^VLANs" | cut -d ":" -f 2)"
+	hosts="$(echo "$nospace" | egrep "^InsideHosts" | cut -d ":" -f 2)"
+	failover="$(echo "$nospace" | egrep "^Failover" | cut -d ":" -f 2)"
+	vpn="$(echo "$nospace" | egrep "^VPN-3DES-AES" | cut -d ":" -f 2)"
+	peers="$(echo "$nospace" | egrep "^*TotalVPNPeers" | cut -d ":" -f 2)"
+	vlan="$(echo "$nospace" | egrep "^VLANTrunkPorts" | cut -d ":" -f 2)"
+	license="$(egrep "^This platform has" "$line" | sed -E "s/^This platform has (a|an)[[:space:]]//g" | sed -E "s/[[:space:]]license./""/g")"
+	sn="$(echo "$nospace" | egrep "^SerialNumber" | cut -d ":" -f 2)"
+	key="$(echo "$nospace" | egrep "^RunningActivationKey" | cut -d ":" -f 2)"
+
+	echo "$hostName,$phy,$vlans,$hosts,$failover,$vpn,$peers,$vlan,$license,$sn,$key" >> "$1"
+done
+
+
+
+exit 0

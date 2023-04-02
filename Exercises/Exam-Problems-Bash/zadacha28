@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then 
+	echo "There must be two parametrs!" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "The first parameter must be a directory!" >&2
+	exit 2
+fi
+
+if [ -z "$2" ]; then
+	echo "The second parameter must be a non-empty string!" >&2
+	exit 3
+fi
+
+find "$1" -maxdepth 1 -type f | egrep "$2" | sort -nr -t'.' -k123 | head -n 1
+
+exit 0

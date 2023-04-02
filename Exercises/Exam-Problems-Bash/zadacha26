@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#if [ "$(whoami)" != "root" ]; then 
+#	echo "You must be root to execute this program!" >&2
+#	exit 1
+#fi
+
+ps -e -o user= | sort | uniq -c | while read line; do
+	user="$( echo "$line" | awk '{print $2}' )"
+	pr="$( echo "$line" | awk '{print $1}' )"
+	rss="$(ps --user "$user" -o rss= | awk 'BEGIN{sum = 0}{sum = sum + $1}END{print sum}')"
+	echo "User: $user, Processes num: $pr, Rss: $rss"
+done 
+
+ps -e -o user= | sort | uniq | while read line; do
+	avg="$(ps --user "$line" -o rss= | awk 'BEGIN{sum = 0}{sum = sum + $1}END{print sum/NR*2}')"
+	flag="$(ps --user s62546 -o pid=,rss= --sort=-rss | head -n 1 | awk -v a=$avg '{if($2>a){print 1;} else {print 0;}}')"
+	pid="$(ps --user s62546 -o pid=,rss= --sort=-rss | head -n 1 | awk '{print $1}')"
+	if [ "$flag" -eq 1 ]; then
+		#kill -KILL "$pid"
+		echo "Kill pid: $pid of user: $line"
+	fi
+done
+
+exit 0

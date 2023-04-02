@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$#" -le 1 -o "$#" -gt 2 ]; then 
+	echo "There must be one or two parameters!" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "The first parameter must be a number!" >&2
+	exit 2
+fi
+
+
+if [ "$#" -eq 1 ]; then 
+	find -L "$1" -type l
+elif [ "$#" -eq 2 ]; then
+	if ! (echo "$2" | egrep -q "^[0-9]+$"); then
+		echo "The second parameter must be a number!" >&2
+		exit 3
+	fi
+	find "$1" -printf "%P %n\n" | awk -v num="$2" '{if(num<= $2)}'	
+fi
+
+exit 0

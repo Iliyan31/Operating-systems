@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then 
+   	echo "sekjdfav!\n" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "dskshjafg!\n" >&2
+	exit 2
+fi
+
+if [ -z "$2" -o -z "$3" ]; then 
+	echo "ksdjhf!\n" >&2
+	exit 3
+fi
+
+sed -i "/^$/d;s/^\s\+//g;s/\s\+$//g;s/\s\+=/=/g;s/=\s\+/=/g" "$1"
+user="$(id -un)"
+date="$(date)"
+t="$(egrep "^$2=" "$1" | wc -l)"
+
+if [ "$t" -eq 0 ]; then
+	echo "$2=$3 # added at $date by $user" >> "$1"
+else
+	line="$(egrep "^$2=" "$1")"
+	sed -i "s/^$line/#$line # edited at $date by $user\n#edited at $date by $user/g" "$1"
+fi
+
+exit 0

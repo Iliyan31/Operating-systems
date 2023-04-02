@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "There must be one parameter!" >&2
+	exit 1
+fi
+
+if ! ( echo "$1" | egrep "^[0-9]+$" ); then
+	echo "NOT number!" >&2
+	exit 2
+fi
+
+#if [ "$(whoami)" != "root" ]; then 
+#	echo "You must be root to execute this program!" >&2
+#	exit 3
+#fi
+
+ps -e -o user=,pid=,rss= --sort=-rss | while read line; do
+	rss="$(echo "$line" | awk '{print $3}')"
+	
+	log="$(mktemp)"
+
+	if [ "$rss" -gt "$1" ]; then
+		username="$(echo "$line" | awk '{print $1}')"
+		if (egrep "$username" "$log"); then
+			continue
+		fi
+		
+		echo "$username" >> "$log"
+
+		pid="(ps --user $username -o pid=,rss= --sort=-rss | head -n 1 | awk '{print $1}')"
+		#kill -KILL $pid
+		echo "Kill $pid of user: $username with rss: $rss"		
+	fi
+done
+
+exit 0

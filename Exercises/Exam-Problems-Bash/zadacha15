@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "There must be one parameter!" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "The first parameter must be a working directory!" >&2
+	exit 2   
+fi
+
+echo "Symlinks: " 
+find "$1" -type l
+echo "Broken: "
+find -L "$1" -type l

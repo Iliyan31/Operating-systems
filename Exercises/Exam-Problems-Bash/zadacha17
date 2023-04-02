@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#if [ "$(whoami)" != "root" ]; then
+#	echo "You must be root to execute this program!" >&2
+#	exit 1
+#fi
+
+awk -F ':' '{print $1, $6}' /etc/passwd | while read line; do
+	user="$(echo "$line" | awk '{print $1}')"
+	home="$(echo "$line" | awk '{print $2}')"
+
+	if [ ! -d "$home" ]; then # || [ -w "$home" ]
+		egrep "$user" /etc/passwd
+	fi
+done
+
+exit 0

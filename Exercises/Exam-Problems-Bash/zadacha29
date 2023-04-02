@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#if [ "$(whoami)" != "root" ]; then 
+#	echo "You must be root to execute this program!" >&2
+#	exit 1
+#fi
+
+cat /etc/passwd | egrep -v "root" | awk -F ':' '{print $1, $6}' | while read line; do
+	user="$(echo "$line" | egrep -v "root" | awk -F ':' '{print $1}')"
+	home="$(echo "$line" | egrep -v "root" | awk -F ':' '{print $6}')"
+	if [ ! -d $home ] || [ "$(stat "$home" -c "%U")" != "$user" ] || [ -w "$home" ]; then 
+		rootRss="$(ps --user "root" -o rss= | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}')"
+		userRss="$(ps --user "$user" -o rss= | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}')"
+
+		if [ "$rootRss" -lt "$userRss" ]; then 
+			ps --user "$user" -o pid= | while read pid; do
+				#kill -KILL "$pid"	
+				echo "Killer pid for user: $user, pid: $pid"
+			done
+		fi
+	fi
+done 
+
+exit 0

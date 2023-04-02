@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+	echo "There must be two parameters!" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "The first parameter must be a file!" >&2
+	exit 2
+fi
+
+if [ ! -d "$2" ]; then 
+	echo "The second parameter must be a directory!" >&2
+	exit 3
+fi
+
+if [ "$( find "$2" -mindepth 1 -maxdepth 1 | wc -l )" -ne 0 ]; then 
+	echo "The second parameter mustbe an empty directory!" >&2
+	exit 4
+fi
+
+touch "$2"/dict.txt
+
+cat "$1" | cut -d ":" -f1 | awk 'BEGIN{key = 0}{key+=1}{print $1, $2";"key}' >> "$2"/dict.txt
+
+cat "$2"/dict.txt | while read line; do
+	name="$(echo "$line" | cut -d ';' -f 2)"
+	touch "$2"/"$name.txt"
+	awk -v num="$name" 'NR==num' >> "$2"/"$name.txt"
+done
+exit 0

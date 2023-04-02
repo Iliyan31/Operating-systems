@@ -1,0 +1,48 @@
+#!/bin/bash
+
+### podtochka a) ###
+#input="$(while [ "$#" -gt 0 ]; do
+#	if ( echo "$1" | egrep -q "^-?[0-9]+$" ); then 
+#		echo "$1"
+#	fi
+#	shift
+#done)"
+#
+#echo "$input"
+#
+#max="$(echo "$input" | sort -nr | head -n 1)"
+#
+#echo "$input" | egrep "^-?$max"
+
+### podtochka b) ###
+
+
+input="$(while [ "$#" -gt 0 ]; do
+	if ( echo "$1" | egrep -q "^-?[0-9]+$" ); then 
+		echo "$1"
+	fi
+	shift
+done)"
+
+max=-1
+num=0
+sum=0
+echo "$input" | sort -n | while read line; do	
+	temp="$(echo "$line" | sed "s/-//g")"	
+
+	while [ "$temp" -gt 0 ]; do
+		mod="$(("$temp" % 10))"
+		sum="$(("$mod" + "$sum"))"
+		temp="$(("$temp" / 10))"
+	done
+	
+	if [ "$sum" -gt "$max" ]; then
+		num="$line"
+		max="$sum"
+	fi
+	sum=0
+done
+
+echo "$num"
+
+exit 0

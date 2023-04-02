@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then 
+	echo "There must bee one parameter!" >&2
+	exit 1
+fi
+
+if [ -z "$1" ]; then 
+	echo "The first parameter mustn't be an empty string!" >&2
+	exit 2
+fi
+
+if [ "$(whoami)" != "root" ]; then 
+	echo "You must be root to execute this program!" >&2
+	exit 3
+fi
+
+pr="$(ps --user "$1" | wc -l)"
+
+ps -e -o user=| sort | uinq -c | while read line; do
+	if [ "$(echo "$line" | awk '{print $1}')" -gt "$pr"]; then 
+		echo "$line" | awk '{print $2}'
+	fi
+done
+
+avg="$(ps -e -o times= | tail -n +2 | awk 'BEGIN{total=0}{total = total + $1} END{print(total/NR)*2}')"
+
+ps --user "$1" -o user=,pid=,times= | while read line; do
+if [ "$(echo "$line" | awk '{if(avg < "$3")}{print 1}')" -eq 1]; then 
+	$kill -KILL "$(echo "$line" | awk '{print $1}')"
+	echo "Processes killed for user: "$(echo "$line" | awk '{print $1}')" pid : "$(echo "$line" | awk '{print $2}')""
+fi
+done
+
+exit 0
+

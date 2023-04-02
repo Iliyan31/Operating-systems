@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "There must be one parameter!" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" -o ! -r "$1" ]; then
+	echo "The first parameter must be a file and be readable!" >&2
+	exit 2
+fi
+
+cut -d " " -f 2 "$1" | sort | uniq -c | sort -rbk 1 | sed "s/^[[:space:]]*[[:digit:]]* //g" | head -n 3 |while read line; do
+	cat "$1" | awk -F ' ' -v site="$line" 'BEGIN{http = 0; nonhttp = 0}{
+	if($2 == site) {
+		if($8 == "HTTP/2.0") {
+			http++;
+		}
+		else {
+			nonhttp++;
+		}
+	}
+} END {print site,"HTTP/2.0:", http, "non-HTTP/2.0:", nonhttp}'
+done
+
+awk -F ' ' '$9 > 302 {print $1}' "$1" | sort | uniq -c | sort -rbk 1 | head -n 5
+
+exit 0

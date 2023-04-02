@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "There must be one parameter!" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "The first parameter must be a directory!" >&2
+	exit 2
+fi
+
+while read dir; do
+	n="$(find "$dir" -type f | egrep "^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}-[[:digit:]]{2}-[[:digit:]]{2}-[[:digit:]]{2}.txt$" | xargs -I {} wc -l {} | 
+		awk -v 'sum=0' '{sum += $1}END{print sum}')"
+	echo "$n $dir"
+done < <(find "$1" -mindepth 3 -maxdepth 3 -type d | sort) | sort -t ' ' -nr | uniq | head -n 10 

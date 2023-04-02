@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ "$#" -lt 1 -o "$#" -gt 2 ]; then 
+	echo "There must be one or two parameters!" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "The first parameter must be a working directory!" >&2
+	exit 2
+fi
+
+if [ "$#" -eq 1 ]; then 
+	broken="$(find -L "$1" -type l | wc -l)"
+	find "$1" -type l | grep "$(find -L "$1" -type l)" | xargs -I {} stat -c "%N"
+	echo "Broken symlinks: $broken"
+elif [ "$#" -eq 2 ]; then
+	if [ ! -f "$2" ]; then
+		echo "the second parameter must be a file!" >&2
+		exit 3
+	fi
+
+	broken="$(find -L "$1" -type l | wc -l)"
+	find "$1" -type l | grep "$(find -L "$1" -type l)" | xargs -I {} stat -c "%N" >> "$2"
+	echo "Broken symlinks: $broken" >> "$2"
+fi
+
+exit 0

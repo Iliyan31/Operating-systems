@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then 
+	echo "There must be three parameters!" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "The first parameter must be a file!" >&2
+	exit 2
+fi
+
+if [ -z "$2" ]; then 
+	echo "The second parameter mustn't be an empty string!" >&2
+	exit 3
+fi
+
+if [ -z "$3" ]; then 
+	echo "The third parameter mustn't be an empty string!" >&2
+	exit 4
+fi
+
+cat "$1" | egrep -w "$2" | cut -d "=" -f 2 | tr ' ' '\n' | while read line; do
+	if (egrep -w "$3" "$1" | cut -d '=' -f 2 | tr ' ' '\n' | egrep -wq "$line"); then 
+		egrep -w "$3" "$1" | cut -d '=' -f 2 | sed -i "s/"$line" /""/g" 
+	fi	
+done 
+
+#cat "$1" | egrep -q "$2" | cut -d "=" -f 2 | tr ' ' '\n' | while read line; do
+#	if ( cat "$1" | egrep "$3" | cut -d "=" -f 2 | egrep -q "$line" ); then 
+#		 egrep "$3" "$1"
+#	fi
+#done

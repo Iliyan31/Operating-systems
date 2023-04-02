@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+   	echo "saSClhv!\n" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "djvbjDZ!\n" >&2
+	exit 2
+fi
+
+if [ -d "$2" ]; then 
+	echo "aslfjh!\n" >&2
+	exit 3
+fi
+
+if ! mkdir "$2"; then 
+	echo "DJLvk!\n" >&2
+	exit 4
+fi
+
+while read line; do
+	name="$(echo "$line" | sed -e "s/\s\+/ /g;s/ \./\./g;s/^ //g;s/([[:alpha:] ]*)//g" | cut -d '.' -f 1)"
+	album="$(echo "$line" | awk -F '(' '{print $NF}' | cut -d ')' -f 1 | sed -e "s/.*\.jpg$/misc/g")"
+	date="$(stat "$line" -c '%y' | awk '{print $1}')"
+	sha="$(sha256sum "$line" | cut -c -16)"
+
+	dst="$2/images/$sha.jpg"
+
+	mkdir "$2/by-date/$date/by-album/$album/by-title/$name"
+	ln -s "$dst" "$2/by-date/$date/by-album/$album/by-title/$name.jpg"
+
+	mkdir "$2/by-date/$date/by-title/$name"
+	ln -s "$dst" "$2/by-date/$date/by-title/$name.jpg"
+
+	mkdir "$2/by-album/$album/by-date/$date/by-title/$name"
+	ln -s "$dst" "$2/by-album/$album/by-date/$date/by-title/$name.jpg"
+
+	mkdir "$2/by-album/$date/by-title/$name"
+	ln -s "$dst" "$2/by-album/$date/by-title/$name.jpg"
+
+	mkdir "$2/by-title/$name"
+	ln -s "$dst" "$2/by-title/$name.jpg"
+done < <(find "$1" -name "*.jpg" -type f -printf "%f\n")

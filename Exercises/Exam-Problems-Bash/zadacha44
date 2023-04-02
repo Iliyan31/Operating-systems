@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then 
+	echo "A!\n" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "B!\n" >&2
+	exit 2
+fi
+
+if [ ! -f "$2" ]; then 
+	echo "C!\n" >&2
+	exit 3
+fi
+
+#if ! (echo "$2" | egrep "*.h") ; then 
+#	echo "D!\n" >&2
+#	exit 4
+#fi
+
+t="$(mktemp)" 
+xxd "$1" | cut -c 11-49 | tr ' ' '\n' | tr -s '\n' > $t 
+size="$(cat "$t" | wc -l)"
+
+echo "const uint32_t arrN = $size" > $2
+
+echo "const uint16_t arr[] = {" >> $2
+for i in $(cat $t); do
+	left="$(echo "$i" | cut -c 1-2)"
+	right="$(echo "$i" | cut -c 3-4)"
+	echo "0x$right$left," >> "$2"
+done
+
+echo "};" >> $2
+
+rm $t

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then 
+	echo "wljeafh!\n" >&2
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "zskdjvb!n\n" >&2
+	exit 2
+fi
+
+if [ ! -f "$2" ]; then 
+	echo "klszdhl!\n" >&2
+	exit 3
+fi
+
+if [ ! -d "$3" ]; then 
+	echo "ksjddkhv!\n" >&2
+	exit 4
+fi
+
+valid=""
+while read line; do
+	errors="$(egrep -nv "^(#.*|[[:space:]]*|\{ [a-zA-Z_]+-?[a-zA-Z_]*;? \};)$" "$line")"
+	if [ ! -z "$errors" ]; then
+		echo "Error in line:"
+	else 
+		valid="$valid $line"
+		continue
+	fi
+	echo "$errors" | awk -F ':' '{printf "Line "$1": "$2"\n"}'
+	echo ""
+done < <(find "$3" -name "*.cfg")"
+
+echo "$valid" | while read line; do
+

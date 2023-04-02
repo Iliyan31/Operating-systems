@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then 
+	echo "There must be two parameters!" >&2 
+	exit 1
+fi
+
+if ! ( echo "$1" | egrep -q "^[0-9]+$" ); then
+	echo "The first parameter must be a number!" >&2
+	exit 2
+fi
+
+if ! ( echo "$2" | egrep -q "^[0-9]+$" ); then
+	echo "The second parameter must be a number!" >&2
+	exit 3
+fi
+
+if [ "$2" -le "$1" ]; then 
+	echo "The second parameter must be greater than the first!" >&2
+	exit 4
+fi
+
+mkdir ./a ./b ./c
+
+find . - type f | while read line; do
+	if [ "$(cat "$line" | wc -l)" -le "$1" ]; then 
+		mv "$line" ./a
+	elif ["$(cat "$line" | wc -l)" -gt "$1" -a "$(cat "$line" | wc -l)" -lt "$2" ]; then 
+		mv "$line" ./b
+	else 
+		mv "$line" ./c	
+	fi
+done 
+
+exit 0

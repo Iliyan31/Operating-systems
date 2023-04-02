@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then
+	echo "There must be three parameters!" >&2
+	exit 1
+fi
+
+if [ ! -d "$1" ]; then 
+	echo "The first parameter must be a directory!" >&2
+	exit 2
+fi
+
+if [ ! -d "$2" ]; then 
+	echo "The second parameter must be a directory!" >&2
+	exit 3
+fi
+
+#if [ "$(find "$2" -type f | wc -l)" -ne 0 ]; then 
+#  	echo "The second directory must be empty!" >&2
+#	exit 4
+#fi
+
+if [ -z "$3" ]; then
+	echo "The third parameter must be a non-empty string!" >&2
+	exit 5
+fi
+
+#if [ "$(whoami)" != "root" ]; then
+#	echo "You must be root to execute this program!" >&2
+#	exit 6
+#fi
+
+while read file; do
+	dir="$(echo "$file" | cut -d '/' -f 2- | rev | cut -d '/' -f2- | rev)"
+	mkdir -p "$2"/"$dir"
+	cp "$file" "$2"/"$dir"
+
+done < <(find "$1" -name "*$3*" -printf "%p\n") 

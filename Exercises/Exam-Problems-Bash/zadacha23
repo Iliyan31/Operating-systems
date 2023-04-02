@@ -1,0 +1,13 @@
+#!/bin/bash
+
+temp="$(mktemp)"
+cat /etc/passwd | awk -F ':' '{print $1, $6}' | sort -nr | while read line; do
+	user="$(echo "$line" | cut -d " " -f 1)"
+	home="$(echo "$line" | cut -d " " -f 2)"	
+	echo "$user "$(find "$home" -type f -printf "%p %C@\n" 2>/dev/null | sort -nr -t ' ' -k 2 | head -n 1)"" >> "$temp"
+done
+
+sort -nr -t ' ' -k3 "$temp" | head -n 1 | awk -F ' ' '{print $1}'
+
+rm "$temp"
+exit 0

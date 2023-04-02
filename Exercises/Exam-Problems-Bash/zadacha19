@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+	echo "There must be two parameters!" >&2	
+	exit 1
+fi
+
+if [ ! -f "$1" ]; then 
+	echo "The first parameter must be a file!" >&2
+	exit 2
+fi
+
+if [ ! -f "$2" ]; then 
+	echo "The second parameter must be a file!" >&2
+	exit 3
+fi
+
+if [ "$(cat "$1" | wc -l)" -gt "$(cat "$2" | wc -l)" ]; then
+	touch "$1".songs
+	songs="$("$1".songs)"
+	cat "$1" | cut -d '-' -f 2 | cut -c 2- | sort >> ./"$songs"
+elif [ "$(cat "$1" | wc -l)" -lt "$(cat "$2" | wc -l)" ]; then 
+	touch "$2".songs
+	songs="$("$2".songs)"
+	cat "$2" | cut -d '-' -f 2 | cut -c 2- | sort >> ./"$songs
+else 
+	echo "The files have equal size!
+fi
+
+exit 0
